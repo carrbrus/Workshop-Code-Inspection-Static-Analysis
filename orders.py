@@ -71,12 +71,8 @@ def process_order(token, items, coupon=None, shipping="standard", log=None):
 
     return round(total, 2)
 
-def _print_document(title, username, items, footer=None):
-    """Helper function to print invoice or quote to avoid duplication."""
-    print(SEPARATOR)
-    print(f"BOOKSTORE {title}")
-    print("Customer: " + username)
-    print(SEPARATOR)
+def _calculate_and_print_totals(items):
+    """Helper to calculate and print totals, avoiding duplication."""
     subtotal = 0
     for item in items:
         book = database.get_book(item["book_id"])
@@ -86,45 +82,32 @@ def _print_document(title, username, items, footer=None):
             book[1] + " x" + str(item["qty"])
             + " = " + str(line_total)
         )
+    
     tax = subtotal * TAX
     print("Subtotal: " + str(round(subtotal, 2)))
     print("Tax: " + str(round(tax, 2)))
     print("Total: " + str(round(subtotal + tax, 2)))
-    
-    if footer:
-        print(footer)
-        
-    print(SEPARATOR)
 
 def print_invoice(username, items):
-    _print_document("INVOICE", username, items)
+    print(SEPARATOR)
+    print("BOOKSTORE INVOICE")
+    print("Customer: " + username)
+    print(SEPARATOR)
+    
+    _calculate_and_print_totals(items)  # Call the shared function
+    
+    print(SEPARATOR)
 
 def print_quote(username, items):
-    _print_document("QUOTE", username, items, footer="This quote is valid for 7 days.")
     print(SEPARATOR)
     print("BOOKSTORE QUOTE")
     print("Customer: " + username)
     print(SEPARATOR)
-
-    subtotal = 0
-
-    for item in items:
-        book = database.get_book(item["book_id"])
-        line_total = book[2] * item["qty"]
-        subtotal += line_total
-        print(
-            book[1] + " x" + str(item["qty"])
-            + " = " + str(line_total)
-        )
-
-    tax = subtotal * TAX
-    print("Subtotal: " + str(round(subtotal, 2)))
-    print("Tax: " + str(round(tax, 2)))
-    print("Total: " + str(round(subtotal + tax, 2)))
+    
+    _calculate_and_print_totals(items)  # Call the shared function
+    
     print("This quote is valid for 7 days.")
     print(SEPARATOR)
-
-
 def cancel_order(order_id):
     conn = database.get_connection()
 
