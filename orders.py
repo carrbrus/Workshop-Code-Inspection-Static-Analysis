@@ -50,21 +50,17 @@ def process_order(token, items, coupon=None, shipping="standard", log=None):
         if book[3] < quantity:
             if book[3] > 0:
                 print(
-                    "Only " + str(book[3])
-                    + " units available for " + book[1]
+                    f"Only {book[3]} units available for {book[1]}"
                 )
             else:
-                print("Book out of stock: " + book[1])
+                print(f"Book out of stock: {book[1]}")
             continue
 
         total += book[2] * quantity
         database.update_stock(book[0], book[3] - quantity)
 
     if coupon in COUPONS:
-        if coupon != "STAFF" or auth.is_admin(token):
-            total *= COUPONS[coupon]
-        else:
-            total *= COUPONS[coupon]
+        total *= COUPONS[coupon]
 
     total += SHIPPING_COSTS.get(shipping, 0)
     total += total * TAX
@@ -74,7 +70,6 @@ def process_order(token, items, coupon=None, shipping="standard", log=None):
     log.append(order_id)
 
     return round(total, 2)
-
 
 def print_invoice(username, items):
     print(SEPARATOR)
